@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英語自走式学習システム｜Unit 47</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Lato:wght@400;700;900&display=swap');
+  :root {
+    --blue: #1a4fa0; --orange: #e8630a; --light-blue: #e8f0fb; --light-orange: #fff3e8;
+    --green: #1a7a3c; --light-green: #e8f5ee; --gray: #555; --light-gray: #f5f5f5;
+    --border: #ddd; --red: #c0392b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #f0f2f5; color: #222; font-size: 15px; line-height: 1.7; }
+  .header { background: var(--blue); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .unit-badge { background: var(--orange); color: white; font-family: 'Lato', sans-serif; font-weight: 900; font-size: 22px; width: 48px; height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header-title h1 { font-size: 17px; font-weight: 700; }
+  .header-title p { font-size: 12px; opacity: 0.8; margin-top: 1px; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.2); height: 4px; }
+  .progress-bar-fill { background: var(--orange); height: 4px; transition: width 0.4s ease; width: 0%; }
+  .steps-nav { background: white; border-bottom: 2px solid var(--border); overflow-x: auto; }
+  .steps-nav-inner { max-width: 860px; margin: 0 auto; display: flex; padding: 0 20px; }
+  .step-tab { padding: 12px 16px; font-size: 13px; font-weight: 500; color: #888; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; user-select: none; }
+  .step-tab:hover { color: var(--blue); }
+  .step-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 700; }
+  .step-tab.done { color: var(--green); }
+  .step-tab.done::before { content: '✓ '; font-size: 11px; }
+  .main { max-width: 860px; margin: 0 auto; padding: 24px 20px 60px; }
+  .card { background: white; border-radius: 10px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e8eaed; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--blue); display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-blue); }
+  .step-intro { background: var(--light-blue); border-left: 4px solid var(--blue); border-radius: 6px; padding: 14px 16px; margin-bottom: 18px; font-size: 14px; color: #333; }
+  .step-intro strong { display: block; font-size: 15px; margin-bottom: 4px; color: var(--blue); }
+  .flow-diagram { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 14px 0; font-size: 13px; }
+  .flow-item { background: var(--blue); color: white; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; }
+  .flow-arrow { color: var(--blue); font-weight: 700; }
+  .listen-btn { display: flex; align-items: center; gap: 10px; background: var(--orange); color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s, transform 0.1s; margin-bottom: 10px; }
+  .listen-btn:hover { background: #c7550a; transform: translateY(-1px); }
+  .done-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; background: var(--green); color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; }
+  .done-btn:hover { background: #145e2d; }
+  .para-number { display: inline-flex; align-items: center; justify-content: center; background: var(--blue); color: white; width: 26px; height: 26px; border-radius: 50%; font-weight: 900; font-family: 'Lato', sans-serif; font-size: 14px; margin-right: 8px; flex-shrink: 0; }
+  .para-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-blue); }
+  .para-topic { font-size: 14px; font-weight: 700; color: white; background: var(--blue); padding: 3px 10px; border-radius: 4px; }
+  .english-text { font-family: 'Lato', sans-serif; font-size: 16px; line-height: 1.9; color: #1a1a1a; background: #fafafa; border-radius: 8px; padding: 16px; border: 1px solid #e8eaed; margin-bottom: 14px; }
+  .english-text .idiom { color: var(--orange); font-weight: 700; }
+  .english-text .grammar { color: var(--blue); font-weight: 700; }
+  .japanese-text { font-size: 14px; color: #444; line-height: 1.8; padding: 12px 16px; background: #fffdf5; border-radius: 8px; border-left: 3px solid var(--orange); margin-bottom: 16px; }
+  .section-label { font-size: 12px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; margin-top: 16px; display: flex; align-items: center; gap: 6px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-bottom: 8px; }
+  .vocab-item { display: flex; align-items: baseline; gap: 6px; background: var(--light-blue); border-radius: 6px; padding: 8px 12px; font-size: 14px; }
+  .vocab-en { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--blue); }
+  .vocab-sep { color: #aaa; font-size: 12px; }
+  .vocab-ja { color: #333; font-size: 13px; }
+  .idiom-list { display: flex; flex-direction: column; gap: 6px; }
+  .idiom-item { display: flex; align-items: baseline; gap: 8px; background: var(--light-orange); border-radius: 6px; padding: 8px 12px; font-size: 14px; flex-wrap: wrap; }
+  .idiom-en { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--orange); }
+  .idiom-ja { color: #444; font-size: 13px; }
+  .grammar-box { background: #f0f4ff; border: 1px solid #b8c8f0; border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 14px; }
+  .grammar-box .g-title { font-weight: 700; background: var(--blue); color: white; display: inline-block; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; font-size: 13px; }
+  .grammar-box .g-sentence { font-family: 'Lato', sans-serif; font-size: 15px; color: #1a1a1a; margin-bottom: 8px; padding: 8px 12px; background: white; border-radius: 6px; border-left: 3px solid var(--blue); }
+  .grammar-box .g-note { font-size: 13px; color: #555; line-height: 1.7; }
+  .check-box { background: var(--light-green); border: 1px solid #a8d8b8; border-radius: 8px; padding: 14px 16px; margin-top: 14px; }
+  .check-box .check-title { font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .check-q { font-size: 14px; color: #333; }
+  .check-a-btn { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1.5px solid var(--green); color: var(--green); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: all 0.2s; margin-top: 4px; }
+  .check-a-btn:hover { background: var(--green); color: white; }
+  .check-answer { display: none; background: white; border-left: 3px solid var(--green); padding: 10px 14px; border-radius: 6px; font-size: 14px; color: #222; margin-top: 6px; animation: fadeIn 0.3s ease; }
+  .check-answer.visible { display: block; }
+  .check-answer .a-label { color: var(--green); font-weight: 700; margin-right: 4px; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+  .quiz-item { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .quiz-q { font-size: 15px; color: #222; margin-bottom: 14px; font-weight: 500; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border); cursor: pointer; font-size: 14px; transition: all 0.15s; user-select: none; }
+  .quiz-opt:hover { border-color: var(--blue); background: var(--light-blue); }
+  .quiz-opt.selected { border-color: var(--blue); background: var(--light-blue); }
+  .quiz-opt.correct { border-color: var(--green); background: var(--light-green); }
+  .quiz-opt.wrong { border-color: var(--red); background: #fdecea; }
+  .quiz-opt .opt-letter { width: 26px; height: 26px; border-radius: 50%; background: var(--light-gray); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .quiz-feedback { display: none; margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 14px; animation: fadeIn 0.3s ease; }
+  .quiz-feedback.correct-fb { background: var(--light-green); color: var(--green); border-left: 3px solid var(--green); display: block; }
+  .quiz-feedback.wrong-fb { background: #fdecea; color: var(--red); border-left: 3px solid var(--red); display: block; }
+  .submit-quiz-btn { background: var(--blue); color: white; border: none; border-radius: 8px; padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; margin-top: 8px; }
+  .submit-quiz-btn:hover { background: #143d80; }
+  .quiz-result { display: none; background: var(--light-blue); border-radius: 10px; padding: 20px; text-align: center; margin-top: 20px; animation: fadeIn 0.4s ease; }
+  .quiz-result .score { font-size: 40px; font-weight: 900; color: var(--blue); font-family: 'Lato', sans-serif; }
+  .quiz-result .score-label { font-size: 14px; color: #666; margin-bottom: 12px; }
+  .step-section { display: none; }
+  .step-section.active { display: block; }
+  .next-step-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--blue); color: white; border: none; border-radius: 8px; padding: 14px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; width: 100%; margin-top: 8px; }
+  .next-step-btn:hover { background: #143d80; }
+  .completion-banner { background: linear-gradient(135deg, var(--green), #2ecc71); color: white; border-radius: 12px; padding: 28px; text-align: center; margin-top: 20px; }
+  .completion-banner h2 { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
+  .completion-banner p { font-size: 14px; opacity: 0.9; }
+  @media (max-width: 600px) { .vocab-grid { grid-template-columns: 1fr 1fr; } .english-text { font-size: 15px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="unit-badge">47</div>
+    <div class="header-title">
+      <h1>Potatoes and Tomatoes in 1700s Europe</h1>
+      <p>18世紀の欧州におけるジャガイモとトマト・256 words</p>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+</div>
+
+<div class="steps-nav">
+  <div class="steps-nav-inner">
+    <div class="step-tab active" onclick="goToStep(0)" id="tab0">Step 1｜通しリスニング</div>
+    <div class="step-tab" onclick="goToStep(1)" id="tab1">Step 2｜本文精読</div>
+    <div class="step-tab" onclick="goToStep(2)" id="tab2">Step 3｜確認クイズ</div>
+    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜イディオム復習</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <div class="step-section active" id="step0">
+    <div class="card">
+      <div class="card-title"><span>🔊</span> Step 1｜通しリスニング</div>
+      <div class="step-intro">
+        <strong>最初は本文を見ないで通して聞いてみましょう</strong>
+        下の流れを意識しながら聞いてみよう。
+      </div>
+      <div class="flow-diagram">
+        <div class="flow-item">導入・問いかけ</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">ジャガイモへの抵抗</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">トマトへの恐怖</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">現在の評価</div>
+      </div>
+      <button class="listen-btn" onclick="playAudio()">🔊 音声を再生する（1回目）</button>
+      <audio id="audioPlayer" src="sokujukure139_eibun47.mp3" style="width:100%; margin-bottom:14px; display:block; border-radius:8px;"></audio>
+      <div class="step-intro" style="background:#fff3e8; border-left-color: var(--orange);">
+        <strong>次は本文を見ながら通して聞いてみましょう</strong>
+        内容を意識しながら聞こう。英文と日本語訳は Step 2 で確認できます。
+      </div>
+      <button class="listen-btn" onclick="playAudio()">🔊 音声を再生する（2回目）</button>
+      <br>
+      <button class="done-btn" onclick="completeStep(0)">✓ リスニング完了 → 次へ</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-section" id="step1">
+
+    <!-- Para 1 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">1</span>
+        <span class="para-topic">導入・問いかけ</span>
+      </div>
+      <div class="english-text">
+        Potatoes and tomatoes are two of the most important foods in the West. You may think that Europeans have always loved both foods. <span class="grammar">Who is it that</span> doesn't eat one or either of them almost every day? But surprisingly, people in Europe were afraid to eat both the potato and the tomato at first.
+      </div>
+      <div class="japanese-text">
+        ジャガイモとトマトは、西洋諸国における最も重要な食べ物のうちの2つである。あなたはもしかしたら、ヨーロッパの人たちはこの2つをずっと愛してきたと思っているかもしれない。この2つのどちらか、あるいは両方を毎日食べない人などいるだろうか？ だが驚くべきことに、ヨーロッパの人たちは当初、ジャガイモもトマトも食べるのを嫌がっていたのである。
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法①｜Who is it that ...?（強調構文・疑問文）</div>
+        <div class="g-sentence"><u>Who is it that</u> doesn't eat one or either of them almost every day?</div>
+        <div class="g-note"><strong>It is ～ that ...</strong> の強調構文を疑問文にした形。「一体誰が…しないのか？」という意味で、強調のニュアンスを持つ修辞疑問文。→ 疑問詞②b</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q1</strong> ヨーロッパ人はジャガイモとトマトに対して最初どう感じていたか。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>食べることを嫌がり、恐れていた。</div>
+      </div>
+    </div>
+
+    <!-- Para 2 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">2</span>
+        <span class="para-topic">ジャガイモへの抵抗と普及</span>
+      </div>
+      <div class="english-text">
+        In the 1700s, the population of Europe was growing. But frequent droughts led to poor harvests, and grain supplies were being <span class="idiom">used up</span>. <span class="idiom">Seeing that</span> people were becoming hungry and angry, governments <span class="idiom">set about</span> making the tough and easy-to-grow potato more popular. They <span class="idiom">made much of</span> its benefits in newspaper articles and pamphlets. King Louis XVI's wife Marie Antoinette even <span class="idiom">showed off</span> potato flowers by wearing them in her hair. But while the rich <span class="idiom">went on praising</span> potatoes, the public <span class="idiom">turned</span> them <span class="idiom">down</span>. They thought potatoes had no flavor and, <span class="idiom">if anything</span>, were only good for feeding to animals.
+      </div>
+      <div class="japanese-text">
+        1700年代、ヨーロッパの人口は増加していた。だが、頻繁に干ばつが起き、それが理由で不作となり、穀物の備えが底を突くこともしばしばだった。人民が飢え、怒るのを見て、各国政府は、丈夫で育てやすいジャガイモをもっと普及させることに乗り出した。政府は新聞記事やパンフレットでジャガイモの利点を持てはやした。ルイ16世の妃マリー・アントワネットは、ジャガイモの花を髪に挿して見せびらかすということまでやった。富裕層はジャガイモを称賛するようになったが、その一方で、庶民はそれを受け付けなかった。彼らはジャガイモには風味がなく、むしろ、家畜のえさにしか向いていないと考えていた。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">frequent</span><span class="vocab-sep">｜</span><span class="vocab-ja">頻繁な</span></div>
+        <div class="vocab-item"><span class="vocab-en">harvest</span><span class="vocab-sep">｜</span><span class="vocab-ja">収穫</span></div>
+        <div class="vocab-item"><span class="vocab-en">grain</span><span class="vocab-sep">｜</span><span class="vocab-ja">穀物</span></div>
+        <div class="vocab-item"><span class="vocab-en">flavor</span><span class="vocab-sep">｜</span><span class="vocab-ja">風味・おもむき</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">use up ~</span><span class="idiom-ja">〜を使い果たす；底をつく</span></div>
+        <div class="idiom-item"><span class="idiom-en">seeing (that) ...</span><span class="idiom-ja">…なのを見て；…であるので</span></div>
+        <div class="idiom-item"><span class="idiom-en">set about ~</span><span class="idiom-ja">〜に取りかかる；〜に乗り出す</span></div>
+        <div class="idiom-item"><span class="idiom-en">make much of ~</span><span class="idiom-ja">〜を重視する；〜を称賛する</span></div>
+        <div class="idiom-item"><span class="idiom-en">show off ~</span><span class="idiom-ja">〜を見せびらかす；〜を誇示する</span></div>
+        <div class="idiom-item"><span class="idiom-en">go on ~ing</span><span class="idiom-ja">〜し続ける；…し続ける</span></div>
+        <div class="idiom-item"><span class="idiom-en">turn down ~</span><span class="idiom-ja">〜を断る；〜を受け付けない</span></div>
+        <div class="idiom-item"><span class="idiom-en">if anything</span><span class="idiom-ja">むしろ；どちらかと言えば</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法②｜Seeing that ～（分詞構文）</div>
+        <div class="g-sentence"><u>Seeing that</u> people were becoming hungry and angry, governments set about …</div>
+        <div class="g-note"><strong>Seeing that ...</strong> は「…なのを見て；…であるので」という意味の分詞構文。「人々が飢えて怒っているのを見て」という理由を表している。→ 分詞③d</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q2</strong> 政府はなぜジャガイモを普及させようとしたのか。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>干ばつで穀物が不足し、人々が飢えて怒っていたから。</div>
+      </div>
+    </div>
+
+    <!-- Para 3 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">3</span>
+        <span class="para-topic">トマトへの恐怖と真相</span>
+      </div>
+      <div class="english-text">
+        Tomatoes were even scarier to Europeans. The settlers who brought them from Mexico in the 16th century <span class="idiom">boasted about</span> their flavor. But most Europeans <span class="idiom">refrained from</span> eating tomatoes. People called them the "poison apple" and <span class="idiom">suspected</span> them <span class="idiom">of</span> being deadly because many rich people had <span class="idiom">died from</span> eating them. The truth <span class="idiom">all along</span> was that the rich were poisoning themselves <span class="idiom">by accident</span>. The metal plates they used contained high amounts of lead, which the tomatoes absorbed because of their acidity.
+      </div>
+      <div class="japanese-text">
+        ヨーロッパの人たちにとって、トマトはそれ以上に恐ろしいものであった。16世紀にメキシコからトマトを持ち込んだ入植者たちは、その風味の良さを自慢した。だが、ヨーロッパの大半の人はトマトを食べることを控えた。人々はトマトを「毒リンゴ」と呼び、それらが死に至らせるのではないかと疑っていた。というのも、多くの金持ちがトマトを食べて死んでいたからである。事の真相は言えば、初めから彼らは偶然に中毒死していたのである。というのは、彼らが使っていた金属の皿には多量の鉛が含まれており、トマトが酸によってその鉛を吸収していたのだ。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">scary</span><span class="vocab-sep">｜</span><span class="vocab-ja">恐ろしい</span></div>
+        <div class="vocab-item"><span class="vocab-en">poison</span><span class="vocab-sep">｜</span><span class="vocab-ja">毒・に毒を盛る</span></div>
+        <div class="vocab-item"><span class="vocab-en">absorb</span><span class="vocab-sep">｜</span><span class="vocab-ja">を吸収する</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">boast about [of] ~</span><span class="idiom-ja">〜を自慢する；〜を誇る</span></div>
+        <div class="idiom-item"><span class="idiom-en">refrain from ~</span><span class="idiom-ja">〜を控える；〜を差し控える</span></div>
+        <div class="idiom-item"><span class="idiom-en">suspect A of B</span><span class="idiom-ja">AをBと疑う；AがBではないかと思う</span></div>
+        <div class="idiom-item"><span class="idiom-en">die from ~</span><span class="idiom-ja">〜が原因で（直接）死ぬ</span></div>
+        <div class="idiom-item"><span class="idiom-en">all along</span><span class="idiom-ja">最初から；ずっと</span></div>
+        <div class="idiom-item"><span class="idiom-en">by accident [chance]</span><span class="idiom-ja">偶然に；意図せず</span></div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q3</strong> 金持ちがトマトで死んでいた本当の原因は何か。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>金属の皿に含まれた鉛をトマトが吸収し、それを食べていたから。</div>
+      </div>
+    </div>
+
+    <!-- Para 4 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">4</span>
+        <span class="para-topic">現在の評価</span>
+      </div>
+      <div class="english-text">
+        Over time, Europeans found delicious ways to cook potatoes and tomatoes. Now they are no longer scary. In fact, they are *staple foods!
+      </div>
+      <div class="japanese-text">
+        時を経て、ヨーロッパの人たちはジャガイモとトマトをおいしく調理する方法を見つけた。この2つの野菜はもはや恐ろしいものではない。それどころか、それらは主食となっているのである！
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q4</strong> 現在、ジャガイモとトマトはどのような存在か。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>もはや恐ろしいものではなく、主食となっている。</div>
+      </div>
+    </div>
+
+    <div class="card" style="background: var(--light-blue);">
+      <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:10px;">【15字要約】</div>
+      <div style="font-size:20px; font-weight:900; color:#222; letter-spacing:0.05em;">恐れられた食材が主食に変わる</div>
+    </div>
+
+    <button class="next-step-btn" onclick="completeStep(1)">Step 3｜確認クイズへ →</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-section" id="step2">
+    <div class="card">
+      <div class="card-title"><span>📝</span> Step 3｜確認クイズ</div>
+      <p style="font-size:14px; color:#666; margin-bottom:20px;">本文の内容を確認しましょう。各問題の選択肢を選んでから「採点する」を押してね。</p>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q1.</strong> Why did European governments try to promote the potato?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">A</div> Because potatoes were very fashionable at the time.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="true"><div class="opt-letter">B</div> Because grain supplies were running out and people were hungry.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">C</div> Because potatoes were exported from Mexico.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">D</div> Because the rich people demanded them.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q1"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q2.</strong> Why did many Europeans avoid eating tomatoes?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">A</div> Because they did not like the taste.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="true"><div class="opt-letter">B</div> Because many rich people had died from eating them.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">C</div> Because tomatoes only grew in Mexico.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">D</div> Because the government banned them.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q2"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q3.</strong> 次のイディオムの意味として正しいものを選べ。<br><br><em>if anything</em></div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">A</div> もし何かあれば</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">B</div> 最初から</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="true"><div class="opt-letter">C</div> むしろ；どちらかと言えば</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">D</div> 偶然に</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q3"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q4.</strong> What was the real reason rich people died after eating tomatoes?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">A</div> Tomatoes contained a natural poison.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">B</div> They ate too many tomatoes at once.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="true"><div class="opt-letter">C</div> Their metal plates contained lead, which was absorbed by the tomatoes' acidity.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">D</div> The tomatoes were mixed with other poisonous plants.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q4"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q5.</strong> 空欄に入る最も適切な語を選べ。<br><br><em>______ that people were becoming hungry and angry, governments set about making the potato popular.</em></div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">A</div> Despite</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="true"><div class="opt-letter">B</div> Seeing</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">C</div> Although</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">D</div> Unless</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q5"></div>
+      </div>
+
+      <button class="submit-quiz-btn" onclick="submitQuiz()">採点する</button>
+
+      <div class="quiz-result" id="quizResult">
+        <div class="score" id="scoreNum">0/5</div>
+        <div class="score-label">正解数</div>
+        <p id="scoreMsg" style="font-size:15px; color:#333; margin-top:8px;"></p>
+      </div>
+
+      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜イディオム復習へ →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-section" id="step3">
+    <div class="card">
+      <div class="card-title"><span>🃏</span> Step 4｜イディオム復習カード</div>
+      <div class="card" style="background: var(--light-blue); margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:6px;">【15字要約】</div>
+        <div style="font-size:20px; font-weight:900; color:#222;">恐れられた食材が主食に変わる</div>
+      </div>
+      <div class="step-intro">
+        <strong>イディオムをカードで復習しよう！</strong>
+        英語を見て日本語の意味を思い浮かべてから、カードをタップして答えを確認しよう。
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <div style="font-size:13px; color:#888;">カード <span id="cardCurrent">1</span> / <span id="cardTotal">15</span></div>
+        <div style="font-size:13px; color:var(--green); font-weight:700;" id="cardScore">✓ 0 &nbsp; ✗ 0</div>
+      </div>
+      <div style="background:#f0f0f0; height:6px; border-radius:3px; margin-bottom:20px;">
+        <div id="cardProgressBar" style="background:var(--blue); height:6px; border-radius:3px; width:0%; transition:width 0.3s;"></div>
+      </div>
+      <div id="flashcard" onclick="flipCard()" style="cursor:pointer; perspective:1000px; margin-bottom:20px; user-select:none;">
+        <div id="cardInner" style="position:relative; min-height:160px; transition:transform 0.5s; transform-style:preserve-3d;">
+          <div id="cardFront" style="position:absolute; inset:0; background:white; border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden;">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">英語 → タップして日本語を確認</div>
+            <div id="cardEn" style="font-family:'Lato',sans-serif; font-size:22px; font-weight:900; color:#1a1a1a; text-align:center;"></div>
+          </div>
+          <div id="cardBack" style="position:absolute; inset:0; background:var(--light-blue); border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden; transform:rotateY(180deg);">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">日本語</div>
+            <div id="cardJa" style="font-size:19px; font-weight:700; color:var(--blue); text-align:center;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="cardButtons" style="display:none; gap:12px; margin-bottom:16px;">
+        <button onclick="judgeCard(false)" style="flex:1; padding:12px; background:#fdecea; border:2px solid var(--red); border-radius:8px; color:var(--red); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✗ もう一度</button>
+        <button onclick="judgeCard(true)" style="flex:1; padding:12px; background:var(--light-green); border:2px solid var(--green); border-radius:8px; color:var(--green); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✓ わかった！</button>
+      </div>
+      <div id="cardResult" style="display:none; background:var(--light-green); border-radius:10px; padding:20px; text-align:center; margin-bottom:16px;">
+        <div style="font-size:36px; font-weight:900; color:var(--green); font-family:'Lato',sans-serif;" id="finalScore"></div>
+        <div style="font-size:14px; color:#555; margin:8px 0 14px;" id="finalMsg"></div>
+        <button onclick="restartCards()" style="background:var(--blue); color:white; border:none; border-radius:8px; padding:10px 20px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">🔄 もう一度チャレンジ</button>
+      </div>
+      <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
+    </div>
+    <div class="completion-banner" id="completionBanner" style="display:none;">
+      <h2>🎉 Unit 47 完了！</h2>
+      <p>お疲れ様でした。18世紀ヨーロッパのジャガイモとトマトの歴史について学習しました。<br>次のユニットへ進みましょう！</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const stepDone=[false,false,false,false];
+  const quizAnswers={q1:null,q2:null,q3:null,q4:null,q5:null};
+  const correctAnswers={q1:false,q2:false,q3:false,q4:false,q5:false};
+
+  function goToStep(n){
+    document.querySelectorAll('.step-section').forEach((s,i)=>s.classList.toggle('active',i===n));
+    document.querySelectorAll('.step-tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  }
+  function completeStep(n){
+    stepDone[n]=true;
+    const tab=document.getElementById('tab'+n);
+    tab.classList.add('done');tab.classList.remove('active');
+    document.getElementById('progressBar').style.width=(stepDone.filter(Boolean).length/4*100)+'%';
+    if(n<3)goToStep(n+1);
+    else{document.getElementById('completionBanner').style.display='block';document.getElementById('completionBanner').scrollIntoView({behavior:'smooth'});}
+  }
+  function toggleAnswer(btn){
+    const a=btn.nextElementSibling;
+    const v=a.classList.toggle('visible');
+    btn.textContent=v?'▲ 閉じる':'▼ 答えを見る';
+  }
+  function playAudio(){
+    const audio=document.getElementById('audioPlayer');
+    if(audio.paused){audio.play();}else{audio.pause();audio.currentTime=0;}
+  }
+  function selectOpt(el,qid){
+    el.closest('.quiz-item').querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('selected'));
+    el.classList.add('selected');quizAnswers[qid]=el;correctAnswers[qid]=el.dataset.correct==='true';
+  }
+  function submitQuiz(){
+    const questions=['q1','q2','q3','q4','q5'];
+    let score=0;
+    const feedbacks={
+      q1:{correct:'正解！穀物の備えが底をつき、人々が飢えて怒っていたためです。',wrong:'不正解。Para 2「grain supplies were being used up」と「Seeing that people were becoming hungry」を確認しよう。'},
+      q2:{correct:'正解！多くの金持ちがトマトを食べて死んでいたからです。',wrong:'不正解。Para 3「many rich people had died from eating them」を見直そう。'},
+      q3:{correct:'正解！if anything は「むしろ；どちらかと言えば」という意味です。',wrong:'不正解。Para 2のイディオム一覧を見直してみよう。'},
+      q4:{correct:'正解！金属の皿の鉛をトマトの酸が吸収し、それを食べていたためです。',wrong:'不正解。Para 3「The metal plates they used contained high amounts of lead, which the tomatoes absorbed」を確認しよう。'},
+      q5:{correct:'正解！Seeing that は「…なのを見て；…であるので」という分詞構文の表現です。',wrong:'不正解。Para 2の文法②「Seeing that ～」を確認しよう。'},
+    };
+    questions.forEach(q=>{
+      const fb=document.getElementById('fb-'+q);
+      const selected=quizAnswers[q];
+      if(!selected){fb.className='quiz-feedback wrong-fb';fb.textContent='未選択。必ず選んでから採点してね。';return;}
+      const isCorrect=correctAnswers[q];
+      if(isCorrect)score++;
+      selected.classList.remove('selected');
+      selected.classList.add(isCorrect?'correct':'wrong');
+      if(!isCorrect)selected.closest('.quiz-item').querySelectorAll('.quiz-opt').forEach(o=>{if(o.dataset.correct==='true')o.classList.add('correct');});
+      fb.className='quiz-feedback '+(isCorrect?'correct-fb':'wrong-fb');
+      fb.textContent=(isCorrect?'✓ ':'✗ ')+feedbacks[q][isCorrect?'correct':'wrong'];
+    });
+    const result=document.getElementById('quizResult');
+    result.style.display='block';
+    document.getElementById('scoreNum').textContent=score+'/5';
+    const msgs=['💪 もう一度本文を読み直してチャレンジしてみよう！','💪 もう一度本文を読み直してチャレンジしてみよう！','📖 まずまずです。間違えた問題の該当パラグラフを見直そう。','📖 まずまずです。間違えた問題の該当パラグラフを見直そう。','👏 よくできました！あと一息！','🎉 満点！素晴らしい理解力です！'];
+    document.getElementById('scoreMsg').textContent=msgs[score];
+    document.getElementById('toStep4Btn').style.display='flex';
+    result.scrollIntoView({behavior:'smooth'});
+  }
+
+  // ===== FLASHCARD =====
+  const idioms=[
+    {en:'use up ~',ja:'〜を使い果たす；底をつく'},
+    {en:'seeing (that) ...',ja:'…なのを見て；…であるので'},
+    {en:'set about ~',ja:'〜に取りかかる；〜に乗り出す'},
+    {en:'make much of ~',ja:'〜を重視する；〜を称賛する'},
+    {en:'show off ~',ja:'〜を見せびらかす；〜を誇示する'},
+    {en:'go on ~ing',ja:'〜し続ける'},
+    {en:'turn down ~',ja:'〜を断る；〜を受け付けない'},
+    {en:'if anything',ja:'むしろ；どちらかと言えば'},
+    {en:'boast about [of] ~',ja:'〜を自慢する；〜を誇る'},
+    {en:'refrain from ~',ja:'〜を控える；〜を差し控える'},
+    {en:'suspect A of B',ja:'AをBと疑う'},
+    {en:'die from ~',ja:'〜が原因で（直接）死ぬ'},
+    {en:'all along',ja:'最初から；ずっと'},
+    {en:'by accident [chance]',ja:'偶然に；意図せず'},
+    {en:'Who is it that ...?',ja:'一体誰が…するのか？（強調構文）'},
+  ];
+  let cardIndex=0,cardFlipped=false,okCount=0,ngCount=0,order=[];
+  function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function initCards(){order=shuffleArray([...Array(idioms.length).keys()]);cardIndex=0;cardFlipped=false;okCount=0;ngCount=0;document.getElementById('cardTotal').textContent=idioms.length;document.getElementById('cardResult').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('flashcard').style.display='block';showCard();}
+  function showCard(){const idx=order[cardIndex];document.getElementById('cardEn').textContent=idioms[idx].en;document.getElementById('cardJa').textContent=idioms[idx].ja;document.getElementById('cardCurrent').textContent=cardIndex+1;document.getElementById('cardProgressBar').style.width=((cardIndex/idioms.length)*100)+'%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;cardFlipped=false;document.getElementById('cardInner').style.transform='rotateY(0deg)';document.getElementById('cardButtons').style.display='none';}
+  function flipCard(){if(cardFlipped)return;cardFlipped=true;document.getElementById('cardInner').style.transform='rotateY(180deg)';document.getElementById('cardButtons').style.display='flex';}
+  function judgeCard(ok){if(ok)okCount++;else ngCount++;cardIndex++;if(cardIndex>=idioms.length)showResult();else showCard();}
+  function showResult(){document.getElementById('flashcard').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('cardProgressBar').style.width='100%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;const result=document.getElementById('cardResult');result.style.display='block';document.getElementById('finalScore').textContent=okCount+' / '+idioms.length;const pct=Math.round(okCount/idioms.length*100);document.getElementById('finalMsg').textContent=pct===100?'🎉 全問正解！完璧です！':pct>=80?'👏 よくできました！':pct>=60?'📖 もう一周チャレンジしてみよう！':'💪 繰り返して覚えよう！';}
+  function restartCards(){initCards();}
+  window.addEventListener('load',function(){initCards();});
+</script>
+
+</body>
+</html>
